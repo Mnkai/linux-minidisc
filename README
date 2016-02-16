@@ -1,3 +1,19 @@
+FORK CHANGES
+2016-02-16
+  I made a few tweaks and fixes to libnetmd and netmdcli to be able to upload
+songs to a NetMD entirely from the linux CLI. The only closed part needed for
+this is an ACM-based tool to use the Sony codec for converting PCM WAV into
+ATRAC3, the compression used by NetMD.
+  The tool can be found here:
+    https://github.com/Treeki/atrac3tool
+  The ACM codec can be found here:
+    http://www.minidisc.org/atrac3.zip
+  To use the tool, you must install the ACM codec into your system (Windows
+or Wine). Here's how to do it under Wine:
+    https://www.winehq.org/docs/winedev-guide/mm-conf
+  This script is an example how to batch upload MP3s and FLACs to a NetMD:
+    https://gist.github.com/Lana-chan/5de2ee94ff47da256a73
+
 PREREQUISITES
 
 qmake (you don't need the whole Qt stuff for the non-GUI parts, just qmake)
