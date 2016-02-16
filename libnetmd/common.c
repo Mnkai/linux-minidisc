@@ -32,7 +32,7 @@
 #define NETMD_POLL_TIMEOUT 1000	/* miliseconds */
 #define NETMD_SEND_TIMEOUT 1000
 #define NETMD_RECV_TIMEOUT 1000
-#define NETMD_RECV_TRIES 30
+#define NETMD_RECV_TRIES 300
 
 #ifdef WIN32
     #include <windows.h>
@@ -60,8 +60,9 @@ static int netmd_poll(libusb_device_handle *dev, unsigned char *buf, int tries)
         if (libusb_control_transfer(dev, LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_VENDOR |
                             LIBUSB_RECIPIENT_INTERFACE, 0x01, 0, 0, buf, 4,
                             NETMD_POLL_TIMEOUT) < 0) {
-            netmd_log(NETMD_LOG_ERROR, "netmd_poll: libusb_control_transfer failed\n");
-            return NETMDERR_USB;
+            //netmd_log(NETMD_LOG_ERROR, "netmd_poll: libusb_control_transfer failed\n");
+            //return NETMDERR_USB;
+            // this section was commented so the poll would retry in case of libusb error
         }
 
         if (buf[0] != 0) {
