@@ -541,9 +541,7 @@ int main(int argc, char* argv[])
             netmd_log(NETMD_LOG_DEBUG, "New Track: %d\n", track);
             netmd_cache_toc(devh);
             // if an extra argument is given, it's used as track title
-            // for some reason not giving the extra argument makes the program stop
-            // i think i did something wrong
-            if(argc > 2) {
+            if(argc > 3) {
               netmd_set_title(devh, track, argv[3]);
             } else {
               netmd_set_title(devh, track, "test");
