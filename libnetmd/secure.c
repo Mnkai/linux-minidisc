@@ -356,6 +356,7 @@ void netmd_transfer_song_packets(netmd_dev_handle *dev,
     size_t packet_size;
     int error;
     int transferred = 0;
+    char c[32];
 
     p = packets;
     while (p != NULL) {
@@ -371,7 +372,10 @@ void netmd_transfer_song_packets(netmd_dev_handle *dev,
         memcpy(buf + 16, p->data, p->length);
 
         /* ... send it */
-        error = libusb_bulk_transfer((libusb_device_handle*)dev, 2, packet, (int)packet_size, &transferred, 10000);
+        // libusb timeout was set to infinite. 10 seconds is not enough to send a full song
+        error = libusb_bulk_transfer((libusb_device_handle*)dev, 2, packet, (int)packet_size, &transferred, 0);
+        snprintf(c,32,"%d",transferred); //show bytes transferred (debug)
+        puts(c);
         netmd_log(NETMD_LOG_DEBUG, "%d %d\n", packet_size, error);
 
         /* cleanup */

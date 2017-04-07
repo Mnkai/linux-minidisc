@@ -1098,6 +1098,43 @@ int netmd_write_track(netmd_dev_handle* devh, char* szFile)
     return ret;
 }
 
+
+// this function wipes the minidisc
+// todo: wait until it's finished. i couldn't find a way to poll it for that
+int netmd_initialize_disc(netmd_dev_handle* dev)
+{
+    int ret = 0;
+    // wipe request
+    unsigned char request[] = {0x00, 0x18, 0x40, 0xff, 0x00, 0x00};
+    
+    // disk status poll
+    /*unsigned char poll[] = {0x00, 0x18, 0x09,
+                            0x80, 0x01, 0x03, 0x30,
+                            0x88, 0x01, 0x00, 0x30,
+                            0x88, 0x05, 0x00, 0x30,
+                            0x88, 0x07, 0x00,
+                            0xff, 0x00,
+                            0x00, 0x00, 0x00, 0x00};*/
+                            
+    unsigned char reply[255];
+    unsigned char pollrsp[255];
+    char out[10];
+    //unsigned char *buf;
+
+    //buf = request + 9;
+    //netmd_copy_word_to_buffer(&buf, track, 0);
+    ret = netmd_exch_message(dev, request, sizeof(request), reply);
+    /*int i;
+    for (i = 0; i < 300; i++) {
+      netmd_send_message(dev, poll, sizeof(poll));
+      netmd_recv_message(dev, pollrsp);
+      puts(pollrsp);
+      usleep(1000*1000);
+    }*/
+
+    return ret;
+}
+
 int netmd_delete_track(netmd_dev_handle* dev, const uint16_t track)
 {
     int ret = 0;

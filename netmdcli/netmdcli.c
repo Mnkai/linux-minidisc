@@ -326,6 +326,10 @@ int main(int argc, char* argv[])
         {
             netmd_track_restart(devh);
         }
+        else if(strcmp("wipe", argv[1]) == 0)
+        {
+            netmd_initialize_disc(devh);
+        }
         else if(strcmp("settime", argv[1]) == 0)
         {
             track = strtoul(argv[2], (char **) NULL, 10) & 0xffff;
@@ -446,12 +450,15 @@ int main(int argc, char* argv[])
             unsigned char new_contentid[20] = { 0 };
 
             error = netmd_secure_leave_session(devh);
+            puts("leave session ");
             puts(netmd_strerror(error));
 
             error = netmd_secure_set_track_protection(devh, 0x01);
+            puts("set track protection ");
             puts(netmd_strerror(error));
 
             error = netmd_secure_enter_session(devh);
+            puts("enter session ");
             puts(netmd_strerror(error));
 
             /* build ekb */
@@ -480,6 +487,7 @@ int main(int argc, char* argv[])
             }
 
             error = netmd_secure_send_key_data(devh, &ekb);
+            puts("send key data ");
             puts(netmd_strerror(error));
 
             /* cleanup */
@@ -495,12 +503,14 @@ int main(int argc, char* argv[])
             /* exchange nonces */
             gcry_create_nonce(hostnonce, sizeof(hostnonce));
             error = netmd_secure_session_key_exchange(devh, hostnonce, devnonce);
+            puts("session key exchange ");
             puts(netmd_strerror(error));
 
             /* calculate session key */
             retailmac(rootkey, hostnonce, devnonce, sessionkey);
 
             error = netmd_secure_setup_download(devh, contentid, kek, sessionkey);
+            puts("setup download ");
             puts(netmd_strerror(error));
 
             /* read source */
@@ -512,6 +522,7 @@ int main(int argc, char* argv[])
             fread(data, data_size - 60, 1, f);
             fclose(f);
             error = netmd_prepare_packets(data, data_size-60, &packets, &packet_count, kek);
+            puts("prepare packets ");
             puts(netmd_strerror(error));
 
             /* send to device */
@@ -520,6 +531,7 @@ int main(int argc, char* argv[])
                                             (data_size - 60) / 192, packets,
                                             packet_count, sessionkey,
                                             &track, uuid, new_contentid);
+            puts("send packets ");
             puts(netmd_strerror(error));
 
             /* cleanup */
@@ -528,19 +540,27 @@ int main(int argc, char* argv[])
             /* set title */
             netmd_log(NETMD_LOG_DEBUG, "New Track: %d\n", track);
             netmd_cache_toc(devh);
-            netmd_set_title(devh, track, "test");
+            // if an extra argument is given, it's used as track title
+            if(argc > 3) {
+              netmd_set_title(devh, track, argv[3]);
+            } else {
+              netmd_set_title(devh, track, "test");
+            }
             netmd_sync_toc(devh);
 
             /* commit track */
             error = netmd_secure_commit_track(devh, track, sessionkey);
+            puts("commit track ");
             puts(netmd_strerror(error));
 
             /* forget key */
             error = netmd_secure_session_key_forget(devh);
+            puts("forget key ");
             puts(netmd_strerror(error));
 
             /* leave session */
             error = netmd_secure_leave_session(devh);
+            puts("leave session ");
             puts(netmd_strerror(error));
         }
         else if(strcmp("help", argv[1]) == 0)
@@ -787,6 +807,8 @@ void print_syntax()
     puts("settime <track> [<hour>] <minute> <second> [<frame>] - seeks to the given timestamp");
     puts("      (if three values are given, they are minute, second and frame)");
     puts("secure #1 #2 - execute secure command #1 on track #2 (where applicable)");
+    puts("send <lp2 wav> \"<title>\" - upload an LP2-encoded WAV into the netmd with title");
+    puts("wipe - format the entire MD");
     puts("  --- general ---");
     puts("  0x80 = start secure session");
     puts("  0x11 = get player id");
